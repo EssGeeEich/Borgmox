@@ -59,7 +59,7 @@ type StartImageBackupSettings struct {
 
 func GetMachinesByPool(Pool string) ([]MachineInfo, error) {
 	cmd := exec.Command("pvesh", "get", "/pools/"+Pool, "--output-format=json")
-	if output, err := cmd.Output(); err != nil {
+	if output, err := cmd.CombinedOutput(); err != nil {
 		return nil, fmt.Errorf("pvesh returned an error: %w", err)
 	} else {
 		data := GetMachinesByPoolInfo{}
@@ -75,7 +75,7 @@ var regexPveVersion *regexp.Regexp
 
 func GetVersion() (*gv.Version, error) {
 	cmd := exec.Command("pveversion")
-	if output, err := cmd.Output(); err != nil {
+	if output, err := cmd.CombinedOutput(); err != nil {
 		return nil, fmt.Errorf("pveversion returned an error: %w", err)
 	} else {
 		if regexPveVersion == nil {

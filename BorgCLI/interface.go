@@ -55,7 +55,7 @@ func CreateArchive(Repo string, ArchiveName string, Settings CreateArchiveSettin
 
 func GetVersion() (*gv.Version, error) {
 	cmd := exec.Command("borg", "-V")
-	if output, err := cmd.Output(); err != nil {
+	if output, err := cmd.CombinedOutput(); err != nil {
 		return nil, fmt.Errorf("borg returned an error: %w", err)
 	} else {
 		if regexBorgVersion == nil {

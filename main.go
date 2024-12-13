@@ -162,7 +162,7 @@ func runMain() error {
 				}
 
 				log.Printf("Now backing up VM %v (%v)", machine.Name, machine.VMID)
-				if out, err := cmdRunAll.Output(); err != nil {
+				if out, err := cmdRunAll.CombinedOutput(); err != nil {
 					log.Printf("Error backing up VM. VMID %v: %v", machine.VMID, err)
 					log.Printf("Output: %v", string(out))
 					continue
@@ -198,7 +198,7 @@ func runMain() error {
 				}
 
 				log.Printf("Now backing up VM %v (%v)", machine.Name, machine.VMID)
-				if out, err := cmdRunAll.Output(); err != nil {
+				if out, err := cmdRunAll.CombinedOutput(); err != nil {
 					log.Printf("Error backing up VM. VMID %v: %v", machine.VMID, err)
 					log.Printf("Output: %v", string(out))
 					continue
