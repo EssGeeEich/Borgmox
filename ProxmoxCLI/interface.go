@@ -6,6 +6,7 @@ import (
 	"io"
 	"os/exec"
 	"regexp"
+	"strconv"
 
 	gv "github.com/hashicorp/go-version"
 )
@@ -95,7 +96,7 @@ func GetVersion() (*gv.Version, error) {
 
 func StartImageBackup(VMID uint64, Settings StartImageBackupSettings) (*exec.Cmd, error) {
 	args := []string{
-		string(VMID),
+		strconv.FormatUint(VMID, 10),
 		"--stdout",
 		"--quiet",
 	}
