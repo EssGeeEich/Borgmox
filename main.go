@@ -81,7 +81,7 @@ func runMain() error {
 		return fmt.Errorf("cannot verify proxmox version: %w", err)
 	}
 
-	if targetMinimumVersion, err := version.NewVersion("8.2.8"); err != nil {
+	if targetMinimumVersion, err := version.NewVersion("8.0.0"); err != nil {
 		return fmt.Errorf("cannot compare proxmox version; semver error: %w", err)
 	} else if proxmoxVer.LessThan(targetMinimumVersion) {
 		return fmt.Errorf("current proxmox version: %v, minimum version required: %v", proxmoxVer.Original(), targetMinimumVersion.Original())
@@ -124,7 +124,6 @@ func runMain() error {
 						log.Printf("Invalid machine type '%v' for VMID %v, skipping.", string(machine.Type), machine.VMID)
 					}
 				}
-
 			}
 		}
 	}
@@ -181,6 +180,9 @@ func runMain() error {
 				}
 				ArchiveSettings := BorgCLI.CreateArchiveSettings{
 					Compression: "auto,zlib",
+					AdditionalArgs: []string{
+						"--progress",
+					},
 				}
 
 				var cmdBackup *exec.Cmd
@@ -197,10 +199,12 @@ func runMain() error {
 					continue
 				}
 
+				cmdRunAll.Stdout = os.Stdout
+				cmdRunAll.Stderr = os.Stderr
+
 				log.Printf("Now backing up VM %v (%v)", machine.Name, machine.VMID)
-				if out, err := cmdRunAll.CombinedOutput(); err != nil {
+				if err := cmdRunAll.Run(); err != nil {
 					log.Printf("Error backing up VM. VMID %v: %v", machine.VMID, err)
-					log.Printf("Output: %v", string(out))
 					continue
 				}
 
