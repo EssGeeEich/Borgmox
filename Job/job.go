@@ -1,6 +1,7 @@
 package Job
 
 import (
+	"encoding/base64"
 	"net/http"
 	"strings"
 )
@@ -18,9 +19,19 @@ func (s *JobData) sendSuccessNotification(jobSettings BackupJobSettings, title s
 		strings.NewReader(message)); err != nil {
 		return err
 	} else {
+		if jobSettings.Notification.AuthUser != "" {
+			req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(jobSettings.Notification.AuthUser+":"+jobSettings.Notification.AuthPassword)))
+		} else if jobSettings.Notification.AuthPassword != "" {
+			req.Header.Set("Authorization", "Bearer "+jobSettings.Notification.AuthPassword)
+		}
+
 		req.Header.Set("Title", title)
 		req.Header.Set("Priority", string(jobSettings.Notification.SuccessPriority))
 		req.Header.Set("Tags", strings.Join(tags, ","))
+
+		if jobSettings.Notification.SuccessEmailTarget != "" {
+			req.Header.Set("Email", jobSettings.Notification.SuccessEmailTarget)
+		}
 
 		if res, err := http.DefaultClient.Do(req); err != nil {
 			return err
@@ -41,9 +52,19 @@ func (s *JobData) sendFailureNotification(jobSettings BackupJobSettings, title s
 		strings.NewReader(message)); err != nil {
 		return err
 	} else {
+		if jobSettings.Notification.AuthUser != "" {
+			req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(jobSettings.Notification.AuthUser+":"+jobSettings.Notification.AuthPassword)))
+		} else if jobSettings.Notification.AuthPassword != "" {
+			req.Header.Set("Authorization", "Bearer "+jobSettings.Notification.AuthPassword)
+		}
+
 		req.Header.Set("Title", title)
 		req.Header.Set("Priority", string(jobSettings.Notification.FailurePriority))
 		req.Header.Set("Tags", strings.Join(tags, ","))
+
+		if jobSettings.Notification.FailureEmailTarget != "" {
+			req.Header.Set("Email", jobSettings.Notification.FailureEmailTarget)
+		}
 
 		if res, err := http.DefaultClient.Do(req); err != nil {
 			return err

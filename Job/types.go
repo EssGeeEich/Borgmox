@@ -1,6 +1,9 @@
 package Job
 
-import "Borgmox/ProxmoxCLI"
+import (
+	"Borgmox/BorgCLI"
+	"Borgmox/ProxmoxCLI"
+)
 
 type VMBackupMode string
 type LXCBackupMode string
@@ -29,16 +32,20 @@ const (
 )
 
 type NotificationSettings struct {
-	Frequency       NotificationFrequency
-	TargetServer    string
-	Topic           string
-	SuccessPriority NotificationPriority
-	FailurePriority NotificationPriority
+	Frequency          NotificationFrequency
+	TargetServer       string
+	AuthUser           string
+	AuthPassword       string
+	Topic              string
+	SuccessPriority    NotificationPriority
+	FailurePriority    NotificationPriority
+	SuccessEmailTarget string
+	FailureEmailTarget string
 }
 
 type JobResult struct {
 	Error            error
-	SucceededBackups map[uint64]struct{}
+	SucceededBackups map[uint64]string
 	FailedBackups    map[uint64]error
 }
 
@@ -47,12 +54,12 @@ type BackupJobData struct {
 }
 
 type BackupJobSettings struct {
-	VmPool         []string
-	ArchivePrefix  string
-	BorgRepository string
-	VmMode         VMBackupMode
-	LxcMode        LXCBackupMode
-	Notification   NotificationSettings
+	ArchivePrefix string
+	VmPool        []string
+	VmMode        VMBackupMode
+	LxcMode       LXCBackupMode
+	Notification  NotificationSettings
+	Borg          BorgCLI.BorgSettings
 }
 
 type JobConfigurations struct {

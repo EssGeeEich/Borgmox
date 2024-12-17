@@ -1,10 +1,12 @@
 package Job
 
 import (
+	"Borgmox/BorgCLI"
 	"Borgmox/ProxmoxCLI"
 	"fmt"
 	"log"
 	"sort"
+	"strconv"
 )
 
 func sortedMapKeys(m map[uint64]BackupJobData) []uint64 {
@@ -65,7 +67,7 @@ nextJob:
 		}
 
 		result := JobResult{
-			SucceededBackups: make(map[uint64]struct{}, len(machines)),
+			SucceededBackups: make(map[uint64]string, len(machines)),
 			FailedBackups:    make(map[uint64]error, len(machines)),
 		}
 
@@ -77,26 +79,26 @@ nextJob:
 
 			switch machine.Info.Type {
 			case ProxmoxCLI.VM:
-				if err := s.runVmBackup(machine, jobSettings); err != nil {
+				if arkName, err := s.runVmBackup(machine, jobSettings); err != nil {
 					result.FailedBackups[machine.Info.VMID] = err
 					if jobSettings.Notification.Frequency == NF_EveryVmFinished {
 						s.sendFailureNotification(jobSettings, "VM backup failed!", fmt.Sprintf("VM VMID %v: Backup failed!\n%v", machine.Info.VMID, err.Error()), []string{})
 					}
 
 				} else {
-					result.SucceededBackups[machine.Info.VMID] = struct{}{}
+					result.SucceededBackups[machine.Info.VMID] = arkName
 					if jobSettings.Notification.Frequency == NF_EveryVmFinished {
 						s.sendSuccessNotification(jobSettings, "VM backup completed!", fmt.Sprintf("VM VMID %v: Backup completed!", machine.Info.VMID), []string{})
 					}
 				}
 			case ProxmoxCLI.LXC:
-				if err := s.runLxcBackup(machine, jobSettings); err != nil {
+				if arkName, err := s.runLxcBackup(machine, jobSettings); err != nil {
 					result.FailedBackups[machine.Info.VMID] = err
 					if jobSettings.Notification.Frequency == NF_EveryVmFinished {
 						s.sendFailureNotification(jobSettings, "LXC backup failed!", fmt.Sprintf("LXC VMID %v: Backup failed!\n%v", machine.Info.VMID, err.Error()), []string{})
 					}
 				} else {
-					result.SucceededBackups[machine.Info.VMID] = struct{}{}
+					result.SucceededBackups[machine.Info.VMID] = arkName
 					if jobSettings.Notification.Frequency == NF_EveryVmFinished {
 						s.sendSuccessNotification(jobSettings, "LXC backup completed!", fmt.Sprintf("LXC VMID %v: Backup completed!", machine.Info.VMID), []string{})
 					}
@@ -105,14 +107,32 @@ nextJob:
 		}
 
 		// TODO: Prune?
+		if jobSettings.Borg.Prune.Enabled {
+			for _, arkPrefix := range result.SucceededBackups {
+				// TODO: Complete...
+				BorgCLI.PruneByPrefix(jobSettings.Borg, arkPrefix)
+			}
+		}
 
 		jobResults[jobName] = result
 
 		if jobSettings.Notification.Frequency == NF_EntireJobFinished {
 			if len(result.FailedBackups) > 0 && len(result.SucceededBackups) > 0 {
-				s.sendFailureNotification(jobSettings, "Backup Job incomplete!", "Some VM/LXC backup jobs failed!", []string{})
+				strMessage := "Succeeded:\n"
+				for vmid := range result.SucceededBackups {
+					strMessage += "- " + strconv.FormatUint(vmid, 10) + "\n"
+				}
+				strMessage += "\nFailed:\n"
+				for vmid, err := range result.FailedBackups {
+					strMessage += "- " + strconv.FormatUint(vmid, 10) + " (" + err.Error() + ")\n"
+				}
+				s.sendFailureNotification(jobSettings, "Backup Job incomplete!", "Some VM/LXC backup jobs failed!\n"+strMessage, []string{})
 			} else if len(result.FailedBackups) > 0 {
-				s.sendFailureNotification(jobSettings, "Backup Job failed!", "All VM/LXC backup jobs failed!", []string{})
+				strMessage := "\n"
+				for vmid, err := range result.FailedBackups {
+					strMessage += "- " + strconv.FormatUint(vmid, 10) + " (" + err.Error() + ")\n"
+				}
+				s.sendFailureNotification(jobSettings, "Backup Job failed!", "All VM/LXC backup jobs failed!\n"+strMessage, []string{})
 			} else if len(result.SucceededBackups) > 0 {
 				s.sendSuccessNotification(jobSettings, "Backup Job completed!", "All VM/LXC backup jobs succeeded!", []string{})
 			}

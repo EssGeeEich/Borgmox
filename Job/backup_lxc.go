@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-func (s *JobData) runLxcBackup(bjd BackupJobData, js BackupJobSettings) error {
+func (s *JobData) runLxcBackup(bjd BackupJobData, js BackupJobSettings) (string, error) {
 	switch js.LxcMode {
 	case LXCBKP_Image:
 		BackupSettings := ProxmoxCLI.StartImageBackupSettings{
@@ -27,14 +27,15 @@ func (s *JobData) runLxcBackup(bjd BackupJobData, js BackupJobSettings) error {
 		var cmdBackup *exec.Cmd
 		var err error
 		if cmdBackup, err = ProxmoxCLI.StartImageBackup(bjd.Info.VMID, BackupSettings); err != nil {
-			return err
+			return "", err
 		}
 
-		archiveName := genArchiveName(js.ArchivePrefix, "tar", bjd.Info, time.Now())
+		archivePrefix := genArchivePrefix(js.ArchivePrefix, bjd.Info)
+		archiveName := genArchiveName(archivePrefix, time.Now(), "tar")
 
 		var cmdRunAll *exec.Cmd
-		if cmdRunAll, err = BorgCLI.CreateArchiveExec(js.BorgRepository, archiveName, ArchiveSettings, cmdBackup); err != nil {
-			return err
+		if cmdRunAll, err = BorgCLI.CreateArchiveExec(js.Borg, archiveName, ArchiveSettings, cmdBackup); err != nil {
+			return "", err
 		}
 
 		cmdRunAll.Stdout = os.Stdout
@@ -42,12 +43,12 @@ func (s *JobData) runLxcBackup(bjd BackupJobData, js BackupJobSettings) error {
 
 		log.Printf("Now backing up LXC %v (%v)", bjd.Info.Name, bjd.Info.VMID)
 		if err := cmdRunAll.Run(); err != nil {
-			return err
+			return "", err
 		}
 
-		return nil
+		return archivePrefix, nil
 
 	default:
-		return fmt.Errorf("unimplemented backup method for LXCs: %v", string(js.LxcMode))
+		return "", fmt.Errorf("unimplemented backup method for LXCs: %v", string(js.LxcMode))
 	}
 }
