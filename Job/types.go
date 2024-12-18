@@ -31,22 +31,22 @@ const (
 	NP_Disabled NotificationPriority = "off"
 )
 
-type NotificationSettings struct {
+type NotificationTargetInfo struct {
 	Frequency          NotificationFrequency
-	TargetServer       string
-	AuthUser           string
-	AuthPassword       string
-	Topic              string
 	SuccessPriority    NotificationPriority
 	FailurePriority    NotificationPriority
 	SuccessEmailTarget string
 	FailureEmailTarget string
 }
 
-type JobResult struct {
-	Error            error
-	SucceededBackups map[uint64]string
-	FailedBackups    map[uint64]error
+type NotificationSettings struct {
+	BackupTargetInfo NotificationTargetInfo
+	PruneTargetInfo  NotificationTargetInfo
+
+	TargetServer string
+	AuthUser     string
+	AuthPassword string
+	Topic        string
 }
 
 type BackupJobData struct {
@@ -60,6 +60,14 @@ type BackupJobSettings struct {
 	LxcMode       LXCBackupMode
 	Notification  NotificationSettings
 	Borg          BorgCLI.BorgSettings
+}
+
+type JobResult struct {
+	Error            error
+	SucceededBackups map[uint64]struct{}
+	FailedBackups    map[uint64]error
+	SucceededPrunes  map[uint64]struct{}
+	FailedPrunes     map[uint64]error
 }
 
 type JobConfigurations struct {

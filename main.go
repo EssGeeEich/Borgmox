@@ -4,6 +4,7 @@ import (
 	"Borgmox/BorgCLI"
 	"Borgmox/Job"
 	"Borgmox/ProxmoxCLI"
+	"errors"
 	"fmt"
 	"os"
 
@@ -14,8 +15,62 @@ import (
 func runMain() error {
 	var jobData Job.JobData
 
-	if len(os.Args) != 2 {
-		return fmt.Errorf("usage: %s [input.toml]", os.Args[0])
+	//if len(os.Args) != 2 {
+	//	return fmt.Errorf("usage: %s [input.toml]", os.Args[0])
+	//}
+
+	//if os.Args[1] == "--stdout-sample-toml" || true {
+	if true {
+		jobData.BackupJobs = map[string]Job.BackupJobSettings{
+			"My Job": {
+				ArchivePrefix: "",
+				VmPool:        []string{"my_proxmox_vm_pool", "my_proxmox_lxc_pool"},
+				VmMode:        Job.VMBKP_Image,
+				LxcMode:       Job.LXCBKP_Image,
+				Notification: Job.NotificationSettings{
+					BackupTargetInfo: Job.NotificationTargetInfo{
+						Frequency:          Job.NF_EntireJobFinished,
+						SuccessPriority:    Job.NP_Default,
+						FailurePriority:    Job.NP_High,
+						SuccessEmailTarget: "",
+						FailureEmailTarget: "",
+					},
+					PruneTargetInfo: Job.NotificationTargetInfo{
+						Frequency:          Job.NF_EveryVmFinished,
+						SuccessPriority:    Job.NP_Default,
+						FailurePriority:    Job.NP_High,
+						SuccessEmailTarget: "",
+						FailureEmailTarget: "",
+					},
+					TargetServer: "https://ntfy.my.local",
+					AuthUser:     "my_user_or_empty_for_access_token",
+					AuthPassword: "my_user_password_or_token",
+					Topic:        "MyNotificationTopic",
+				},
+				Borg: BorgCLI.BorgSettings{
+					Repository: "ssh://my_borg_repo",
+					RemotePath: "/my/remote/borg/path/if/needed/or/empty",
+					Passphrase: "my-borg-passphrase",
+					Prune: BorgCLI.BorgPruneSettings{
+						Enabled:      false,
+						KeepWithin:   "15D",
+						KeepLast:     10,
+						KeepMinutely: 0,
+						KeepHourly:   0,
+						KeepDaily:    0,
+						KeepWeekly:   8,
+						KeepMonthly:  12,
+						KeepYearly:   10,
+					},
+				},
+			},
+		}
+		if data, err := toml.Marshal(jobData); err != nil {
+			return fmt.Errorf("couldn't encode empty toml template: %w", err)
+		} else {
+			os.Stdout.Write(data)
+			os.Exit(0)
+		}
 	}
 
 	if jobFile, err := os.ReadFile(os.Args[1]); err != nil {
@@ -47,7 +102,20 @@ func runMain() error {
 	}
 
 	// Run the effective backup job
-	jobData.RunJob()
+	operationError := errors.New("operation failed")
+
+	r := jobData.RunJob()
+	for _, val := range r {
+		if val.Error != nil {
+			return operationError
+		}
+		if len(val.FailedBackups) > 0 {
+			return operationError
+		}
+		if len(val.FailedPrunes) > 0 {
+			return operationError
+		}
+	}
 
 	return nil
 }

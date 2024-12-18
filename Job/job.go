@@ -10,8 +10,26 @@ type JobData struct {
 	BackupJobs map[string]BackupJobSettings
 }
 
-func (s *JobData) sendSuccessNotification(jobSettings BackupJobSettings, title string, message string, tags []string) error {
-	if jobSettings.Notification.SuccessPriority == NP_Disabled {
+func highestPriority(a, b NotificationPriority) NotificationPriority {
+	allNotificationTypes := []NotificationPriority{
+		NP_Max,
+		NP_Urgent,
+		NP_High,
+		NP_Default,
+		NP_Low,
+		NP_Min,
+		NP_Disabled,
+	}
+	for _, v := range allNotificationTypes {
+		if a == v || b == v {
+			return v
+		}
+	}
+	return NP_Disabled
+}
+
+func (s *JobData) sendSuccessNotification(jobSettings BackupJobSettings, notificationTargetInfo NotificationTargetInfo, title string, message string, tags []string) error {
+	if notificationTargetInfo.SuccessPriority == NP_Disabled {
 		return nil
 	}
 
@@ -26,11 +44,11 @@ func (s *JobData) sendSuccessNotification(jobSettings BackupJobSettings, title s
 		}
 
 		req.Header.Set("Title", title)
-		req.Header.Set("Priority", string(jobSettings.Notification.SuccessPriority))
+		req.Header.Set("Priority", string(notificationTargetInfo.SuccessPriority))
 		req.Header.Set("Tags", strings.Join(tags, ","))
 
-		if jobSettings.Notification.SuccessEmailTarget != "" {
-			req.Header.Set("Email", jobSettings.Notification.SuccessEmailTarget)
+		if notificationTargetInfo.SuccessEmailTarget != "" {
+			req.Header.Set("Email", notificationTargetInfo.SuccessEmailTarget)
 		}
 
 		if res, err := http.DefaultClient.Do(req); err != nil {
@@ -43,8 +61,8 @@ func (s *JobData) sendSuccessNotification(jobSettings BackupJobSettings, title s
 	}
 }
 
-func (s *JobData) sendFailureNotification(jobSettings BackupJobSettings, title string, message string, tags []string) error {
-	if jobSettings.Notification.FailurePriority == NP_Disabled {
+func (s *JobData) sendFailureNotification(jobSettings BackupJobSettings, notificationTargetInfo NotificationTargetInfo, title string, message string, tags []string) error {
+	if notificationTargetInfo.FailurePriority == NP_Disabled {
 		return nil
 	}
 
@@ -59,11 +77,11 @@ func (s *JobData) sendFailureNotification(jobSettings BackupJobSettings, title s
 		}
 
 		req.Header.Set("Title", title)
-		req.Header.Set("Priority", string(jobSettings.Notification.FailurePriority))
+		req.Header.Set("Priority", string(notificationTargetInfo.FailurePriority))
 		req.Header.Set("Tags", strings.Join(tags, ","))
 
-		if jobSettings.Notification.FailureEmailTarget != "" {
-			req.Header.Set("Email", jobSettings.Notification.FailureEmailTarget)
+		if notificationTargetInfo.FailureEmailTarget != "" {
+			req.Header.Set("Email", notificationTargetInfo.FailureEmailTarget)
 		}
 
 		if res, err := http.DefaultClient.Do(req); err != nil {
