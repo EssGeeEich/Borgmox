@@ -15,12 +15,11 @@ import (
 func runMain() error {
 	var jobData Job.JobData
 
-	//if len(os.Args) != 2 {
-	//	return fmt.Errorf("usage: %s [input.toml]", os.Args[0])
-	//}
+	if len(os.Args) != 2 {
+		return fmt.Errorf("usage: %s [input.toml]", os.Args[0])
+	}
 
-	//if os.Args[1] == "--stdout-sample-toml" || true {
-	if true {
+	if os.Args[1] == "--stdout-sample-toml" {
 		jobData.BackupJobs = map[string]Job.BackupJobSettings{
 			"My Job": {
 				ArchivePrefix: "",
