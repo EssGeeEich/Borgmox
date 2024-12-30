@@ -29,7 +29,7 @@ func highestPriority(a, b NotificationPriority) NotificationPriority {
 }
 
 func (s *JobData) sendSuccessNotification(jobSettings BackupJobSettings, notificationTargetInfo NotificationTargetInfo, title string, message string, tags []string) error {
-	if notificationTargetInfo.SuccessPriority == NP_Disabled {
+	if notificationTargetInfo.SuccessPriority == NP_Disabled || jobSettings.Notification.TargetServer == "" {
 		return nil
 	}
 
@@ -62,7 +62,7 @@ func (s *JobData) sendSuccessNotification(jobSettings BackupJobSettings, notific
 }
 
 func (s *JobData) sendFailureNotification(jobSettings BackupJobSettings, notificationTargetInfo NotificationTargetInfo, title string, message string, tags []string) error {
-	if notificationTargetInfo.FailurePriority == NP_Disabled {
+	if notificationTargetInfo.FailurePriority == NP_Disabled || jobSettings.Notification.TargetServer == "" {
 		return nil
 	}
 

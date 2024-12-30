@@ -41,7 +41,7 @@ func runMain() error {
 						SuccessEmailTarget: "",
 						FailureEmailTarget: "",
 					},
-					TargetServer: "https://ntfy.my.local",
+					TargetServer: "",
 					AuthUser:     "my_user_or_empty_for_access_token",
 					AuthPassword: "my_user_password_or_token",
 					Topic:        "MyNotificationTopic",
@@ -68,6 +68,7 @@ func runMain() error {
 			return fmt.Errorf("couldn't encode empty toml template: %w", err)
 		} else {
 			os.Stdout.Write(data)
+			os.Stdout.WriteString("\n")
 			os.Exit(0)
 		}
 	}
@@ -121,7 +122,7 @@ func runMain() error {
 
 func main() {
 	if err := runMain(); err != nil {
-		fmt.Fprint(os.Stderr, err)
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 	os.Exit(0)

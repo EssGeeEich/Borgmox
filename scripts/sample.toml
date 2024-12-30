@@ -1,0 +1,42 @@
+[BackupJobs]
+[BackupJobs.'My Job']
+ArchivePrefix = ''
+VmPool = ['my_proxmox_vm_pool', 'my_proxmox_lxc_pool']
+VmMode = 'image'
+LxcMode = 'image'
+
+[BackupJobs.'My Job'.Notification]
+TargetServer = ''
+AuthUser = 'my_user_or_empty_for_access_token'
+AuthPassword = 'my_user_password_or_token'
+Topic = 'MyNotificationTopic'
+
+[BackupJobs.'My Job'.Notification.BackupTargetInfo]
+Frequency = 'single job'
+SuccessPriority = 'default'
+FailurePriority = 'high'
+SuccessEmailTarget = ''
+FailureEmailTarget = ''
+
+[BackupJobs.'My Job'.Notification.PruneTargetInfo]
+Frequency = 'every vm'
+SuccessPriority = 'default'
+FailurePriority = 'high'
+SuccessEmailTarget = ''
+FailureEmailTarget = ''
+
+[BackupJobs.'My Job'.Borg]
+Repository = 'ssh://my_borg_repo'
+RemotePath = '/my/remote/borg/path/if/needed/or/empty'
+Passphrase = 'my-borg-passphrase'
+
+[BackupJobs.'My Job'.Borg.Prune]
+Enabled = false
+KeepWithin = '15D'
+KeepLast = 10
+KeepMinutely = 0
+KeepHourly = 0
+KeepDaily = 0
+KeepWeekly = 8
+KeepMonthly = 12
+KeepYearly = 10

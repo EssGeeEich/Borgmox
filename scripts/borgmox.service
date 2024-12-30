@@ -1,0 +1,10 @@
+[Unit]
+Description=Borgmox backup job
+After=network.target
+StartLimitIntervalSec=60
+StartLimitBurst=1
+
+[Service]
+Type=exec
+ExecStart=/bin/sh -c 'borgmox /etc/borgmox/conf.d/*.toml'
+Restart=no

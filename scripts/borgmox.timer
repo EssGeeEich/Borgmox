@@ -1,0 +1,9 @@
+[Unit]
+Description=Backup job
+
+[Timer]
+OnCalendar=*-*-* 3:00:00
+Unit=borgmox.service
+
+[Install]
+WantedBy=multi-user.target
