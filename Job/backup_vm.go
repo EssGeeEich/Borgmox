@@ -7,15 +7,20 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"strconv"
 	"time"
 )
 
-func (s *JobData) runVmBackup(bjd BackupJobData, js BackupJobSettings) error {
+func (s *JobData) runVmBackup(jobName string, bjd BackupJobData, js BackupJobSettings) error {
 	switch js.VmMode {
 	case VMBKP_Image:
 		BackupSettings := ProxmoxCLI.StartImageBackupSettings{
 			Compression: ProxmoxCLI.DontCompress,
 			Mode:        ProxmoxCLI.Snapshot,
+			AdditionalArgs: []string{
+				"--job-id",
+				"borgmox-vm-vmid_" + strconv.FormatUint(bjd.Info.VMID, 10) + "-id_" + removeSpaces(bjd.Info.ID) + "-job_" + removeSpaces(jobName),
+			},
 		}
 		ArchiveSettings := BorgCLI.CreateArchiveSettings{
 			Compression: "auto,zlib",

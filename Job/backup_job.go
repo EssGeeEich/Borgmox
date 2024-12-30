@@ -85,7 +85,7 @@ nextJob:
 
 			switch machine.Info.Type {
 			case ProxmoxCLI.VM:
-				if err := s.runVmBackup(machine, jobSettings); err != nil {
+				if err := s.runVmBackup(jobName, machine, jobSettings); err != nil {
 					result.FailedBackups[machine.Info.VMID] = err
 					if jobSettings.Notification.BackupTargetInfo.Frequency == NF_EveryVmFinished {
 						s.sendFailureNotification(jobSettings, jobSettings.Notification.BackupTargetInfo, "VM backup failed!", fmt.Sprintf("VM VMID %v: Backup failed!\n%v", machine.Info.VMID, err.Error()), []string{})
@@ -105,7 +105,7 @@ nextJob:
 					}
 				}
 			case ProxmoxCLI.LXC:
-				if err := s.runLxcBackup(machine, jobSettings); err != nil {
+				if err := s.runLxcBackup(jobName, machine, jobSettings); err != nil {
 					result.FailedBackups[machine.Info.VMID] = err
 					if jobSettings.Notification.BackupTargetInfo.Frequency == NF_EveryVmFinished {
 						s.sendFailureNotification(jobSettings, jobSettings.Notification.BackupTargetInfo, "LXC backup failed!", fmt.Sprintf("LXC VMID %v: Backup failed!\n%v", machine.Info.VMID, err.Error()), []string{})

@@ -4,11 +4,21 @@ import (
 	"Borgmox/ProxmoxCLI"
 	"fmt"
 	"os"
+	"regexp"
 	"strconv"
 	"time"
 )
 
 var cachedHostname string
+var removeSpacesRegex *regexp.Regexp
+
+func removeSpaces(input string) string {
+	if removeSpacesRegex == nil {
+		removeSpacesRegex = regexp.MustCompile(`\\s`)
+	}
+
+	return removeSpacesRegex.ReplaceAllString(input, "_")
+}
 
 func genArchivePrefix(hostname string, machineInfo ProxmoxCLI.MachineInfo) string {
 	var prefix string
