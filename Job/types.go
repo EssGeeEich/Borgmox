@@ -73,3 +73,8 @@ type JobResult struct {
 type JobConfigurations struct {
 	Jobs map[string]BackupJobSettings
 }
+
+type JobOptions struct {
+	DontBackup bool
+	DontPrune  bool
+}

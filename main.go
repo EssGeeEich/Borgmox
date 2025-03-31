@@ -5,6 +5,7 @@ import (
 	"Borgmox/Job"
 	"Borgmox/ProxmoxCLI"
 	"errors"
+	"flag"
 	"fmt"
 	"os"
 
@@ -15,11 +16,13 @@ import (
 func runMain() error {
 	var jobData Job.JobData
 
-	if len(os.Args) != 2 {
-		return fmt.Errorf("usage: %s [input.toml]", os.Args[0])
-	}
+	dontBackup := flag.Bool("no-backup", false, "disables backing up any VM/LXC, useful for only running prune jobs")
+	dontPrune := flag.Bool("no-prune", false, "disables all prune jobs, useful for only running backup jobs")
+	outputSampleToml := flag.Bool("stdout-sample-toml", false, "disables all processing and prints a sample toml file")
 
-	if os.Args[1] == "--stdout-sample-toml" {
+	flag.Parse()
+
+	if *outputSampleToml {
 		jobData.BackupJobs = map[string]Job.BackupJobSettings{
 			"My Job": {
 				ArchivePrefix: "",
@@ -73,7 +76,11 @@ func runMain() error {
 		}
 	}
 
-	if jobFile, err := os.ReadFile(os.Args[1]); err != nil {
+	if len(flag.Args()) != 1 {
+		return fmt.Errorf("usage: %s [input.toml]", os.Args[0])
+	}
+
+	if jobFile, err := os.ReadFile(flag.Args()[0]); err != nil {
 		return fmt.Errorf("couldn't open toml input file: %w", err)
 	} else if err := toml.Unmarshal(jobFile, &jobData); err != nil {
 		return fmt.Errorf("couldn't decode toml input file: %w", err)
@@ -104,7 +111,11 @@ func runMain() error {
 	// Run the effective backup job
 	operationError := errors.New("operation failed")
 
-	r := jobData.RunJob()
+	r := jobData.RunJob(Job.JobOptions{
+		DontBackup: *dontBackup,
+		DontPrune:  *dontPrune,
+	})
+
 	for _, val := range r {
 		if val.Error != nil {
 			return operationError
