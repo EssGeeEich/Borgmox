@@ -152,6 +152,19 @@ nextJob:
 						}
 					}
 				}
+
+				if jobSettings.Borg.Prune.Compact {
+					if err := s.runCompact(jobSettings); err != nil {
+						result.FailedCompact = err
+						if jobSettings.Notification.PruneTargetInfo.Frequency == NF_EveryVmFinished {
+							s.sendFailureNotification(jobSettings, jobSettings.Notification.PruneTargetInfo, "Repository compact failed!", fmt.Sprintf("Repository: Compact failed!\n%v", err.Error()), []string{})
+						}
+					} else {
+						if jobSettings.Notification.PruneTargetInfo.Frequency == NF_EveryVmFinished {
+							s.sendSuccessNotification(jobSettings, jobSettings.Notification.PruneTargetInfo, "Repository compact succeeded!", "Repository: Compact succeeded!", []string{})
+						}
+					}
+				}
 			}
 		}
 
@@ -182,26 +195,41 @@ nextJob:
 		}
 
 		if jobSettings.Notification.PruneTargetInfo.Frequency == NF_EntireJobFinished {
-			if len(result.FailedPrunes) > 0 && len(result.SucceededPrunes) > 0 {
-				strMessage := "Succeeded:\n"
-				for vmid := range result.SucceededPrunes {
-					strMessage += "- " + strconv.FormatUint(vmid, 10) + "\n"
+			if len(result.FailedPrunes) > 0 || result.FailedCompact != nil {
+				strMessage := ""
+				strTitle := ""
+
+				if len(result.SucceededPrunes) > 0 || result.FailedCompact == nil {
+					strTitle = "Prune Job incomplete!"
+					strMessage = "Some VM/LXC prune jobs failed!\n"
+
+					strMessage := "Succeeded:\n"
+					for vmid := range result.SucceededPrunes {
+						strMessage += "- " + strconv.FormatUint(vmid, 10) + "\n"
+					}
+					if result.FailedCompact == nil {
+						strMessage += "- Compact job\n"
+					}
+
+					strMessage += "\n"
+				} else {
+					strTitle = "Prune Job failed!"
+					strMessage = "All VM/LXC prune jobs failed!\n"
 				}
-				strMessage += "\nFailed:\n"
+
+				strMessage += "Failed:\n"
 				for vmid, err := range result.FailedPrunes {
 					strMessage += "- " + strconv.FormatUint(vmid, 10) + " (" + err.Error() + ")\n"
 				}
+				if result.FailedCompact != nil {
+					strMessage += "- Compact job (" + err.Error() + ")\n"
+				}
+
 				target := jobSettings.Notification.PruneTargetInfo
 				target.FailurePriority = highestPriority(target.FailurePriority, target.SuccessPriority)
-				s.sendFailureNotification(jobSettings, target, "Prune Job incomplete!", "Some VM/LXC prune jobs failed!\n"+strMessage, []string{})
-			} else if len(result.FailedPrunes) > 0 {
-				strMessage := "\n"
-				for vmid, err := range result.FailedPrunes {
-					strMessage += "- " + strconv.FormatUint(vmid, 10) + " (" + err.Error() + ")\n"
-				}
-				s.sendFailureNotification(jobSettings, jobSettings.Notification.PruneTargetInfo, "Prune Job failed!", "All VM/LXC prune jobs failed!\n"+strMessage, []string{})
+				s.sendFailureNotification(jobSettings, target, strTitle, strMessage, []string{})
 			} else if len(result.SucceededPrunes) > 0 {
-				s.sendSuccessNotification(jobSettings, jobSettings.Notification.PruneTargetInfo, "Prune Job completed!", "All VM/LXC prune jobs succeeded!", []string{})
+				s.sendSuccessNotification(jobSettings, jobSettings.Notification.PruneTargetInfo, "Prune Job completed!", "All VM/LXC prune and compact jobs succeeded!", []string{})
 			}
 		}
 

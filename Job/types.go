@@ -68,6 +68,7 @@ type JobResult struct {
 	FailedBackups    map[uint64]error
 	SucceededPrunes  map[uint64]struct{}
 	FailedPrunes     map[uint64]error
+	FailedCompact    error
 }
 
 type JobConfigurations struct {

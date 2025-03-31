@@ -112,6 +112,27 @@ func PruneByPrefix(settings BorgSettings, ArchivePrefix string) (*exec.Cmd, erro
 	return cmd, nil
 }
 
+func Compact(settings BorgSettings) (*exec.Cmd, error) {
+	if !settings.Prune.Compact {
+		return nil, errors.New("compact is disabled in the current borg configuration")
+	}
+
+	args := []string{
+		"compact",
+	}
+
+	args = append(args, settings.Repository)
+
+	cmd := exec.Command("borg", args...)
+	if cmd.Err != nil {
+		return nil, fmt.Errorf("archive compacting process failed: %v", cmd.Err)
+	}
+	cmd.Env = os.Environ()
+	// Will be escaped by cmd.Exec
+	cmd.Env = append(cmd.Env, "BORG_PASSPHRASE="+settings.Passphrase)
+	return cmd, nil
+}
+
 func GetVersion() (*gv.Version, error) {
 	cmd := exec.Command("borg", "-V")
 	if output, err := cmd.CombinedOutput(); err != nil {

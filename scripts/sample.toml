@@ -32,6 +32,7 @@ Passphrase = 'my-borg-passphrase'
 
 [BackupJobs.'My Job'.Borg.Prune]
 Enabled = false
+Compact = true
 KeepWithin = '15d'
 KeepLast = 10
 KeepMinutely = 0

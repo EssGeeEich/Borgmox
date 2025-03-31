@@ -235,11 +235,12 @@ The passphrase for the Repository.
 This is the one you typed in the "Setting up a new Backup Job" step.
 
 ## Borg Prune Settings
-We will rely on the `borg prune` command to erase old backups.
+We will rely on the `borg prune` and `borg compact` commands to erase old backups.
 
 ```toml
 [BackupJobs.'My Job'.Borg.Prune]
 Enabled = false
+Compact = true
 KeepWithin = '15D'
 KeepLast = 10
 KeepMinutely = 0

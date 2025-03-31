@@ -2,6 +2,7 @@ package BorgCLI
 
 type BorgPruneSettings struct {
 	Enabled      bool
+	Compact      bool
 	KeepWithin   string
 	KeepLast     uint64
 	KeepMinutely uint64

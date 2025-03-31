@@ -55,6 +55,7 @@ func runMain() error {
 					Passphrase: "my-borg-passphrase",
 					Prune: BorgCLI.BorgPruneSettings{
 						Enabled:      false,
+						Compact:      true,
 						KeepWithin:   "15d",
 						KeepLast:     10,
 						KeepMinutely: 0,
