@@ -100,6 +100,7 @@ func PruneByPrefix(settings BorgSettings, ArchivePrefix string) (*exec.Cmd, erro
 	}
 
 	args = append(args, "--glob-archives", ArchivePrefix+"*")
+	args = append(args, settings.Repository)
 
 	cmd := exec.Command("borg", args...)
 	if cmd.Err != nil {
