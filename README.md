@@ -6,7 +6,6 @@ This is a go software that runs Proxmox backup and sends them to a borgbackup re
 
 ## Known Issues
 - Back up of Unprivileged LXCs will likely fail
-- Prune job hasn't been tested yet
 
 ## Installing
 
@@ -14,7 +13,7 @@ Download the latest Borgmox release to your PVE server.
 A simple wget is sufficient.
 See the [Releases](https://github.com/EssGeeEich/Borgmox/releases/latest) page.
 
-The suggested location of the executable is `/usr/local/bin/Borgmox`.
+The suggested location of the executable is `/usr/local/bin/borgmox`.
 
 ## Setting up a new Backup Job
 
@@ -56,11 +55,25 @@ Open the file with your favourite editor and fill the fields with whatever looks
 
 You can find out more about these options at the end of this README.
 
-## Running the Backup Job
+## Running the configured Jobs
+
+### Running both the Backup and Prune Job
 
 From your preferred shell, run the following command (as root):
 
-`Borgmox /etc/borgmox/conf.d/*.toml`
+`borgmox /etc/borgmox/conf.d/*.toml`
+
+### Running ONLY the Backup Job
+
+From your preferred shell, run the following command (as root):
+
+`borgmox --no-prune /etc/borgmox/conf.d/*.toml`
+
+### Running ONLY the Prune Job
+
+From your preferred shell, run the following command (as root):
+
+`borgmox --no-backup /etc/borgmox/conf.d/*.toml`
 
 ## Setting up a systemd service
 
