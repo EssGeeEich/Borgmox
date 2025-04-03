@@ -14,7 +14,7 @@ var removeSpacesRegex *regexp.Regexp
 
 func removeSpaces(input string) string {
 	if removeSpacesRegex == nil {
-		removeSpacesRegex = regexp.MustCompile(`\\s`)
+		removeSpacesRegex = regexp.MustCompile(`\s`)
 	}
 
 	return removeSpacesRegex.ReplaceAllString(input, "_")
