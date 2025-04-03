@@ -1,9 +1,9 @@
 package main
 
 import (
-	"Borgmox/BorgCLI"
-	"Borgmox/Job"
-	"Borgmox/ProxmoxCLI"
+	"borgmox/BorgCLI"
+	"borgmox/Job"
+	"borgmox/ProxmoxCLI"
 	"errors"
 	"flag"
 	"fmt"

@@ -1,7 +1,7 @@
 package Job
 
 import (
-	"Borgmox/ProxmoxCLI"
+	"borgmox/ProxmoxCLI"
 	"fmt"
 	"log"
 	"sort"

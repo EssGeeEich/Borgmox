@@ -1,4 +1,4 @@
-module Borgmox
+module borgmox
 
 go 1.22
 

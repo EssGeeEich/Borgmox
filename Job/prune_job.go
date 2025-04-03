@@ -1,7 +1,7 @@
 package Job
 
 import (
-	"Borgmox/BorgCLI"
+	"borgmox/BorgCLI"
 	"log"
 	"os"
 	"os/exec"
