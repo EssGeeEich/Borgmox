@@ -24,8 +24,8 @@ If you haven't done so, it's best to set up your borg repository before this ste
 Here's an example taken from [Jeff Stafford's blog](https://jstaf.github.io/posts/backups-with-borg-rsync/#setup):
 
 ```
-# only for Rsync.net users
-export BORG_REMOTE_PATH=/usr/local/bin/borg1/borg1
+# only for Rsync.net users, use borg12 or borg14 according to your local borg version (borg -V)
+export BORG_REMOTE_PATH=borg12
 
 # see "borg init --help" for more options like storage quotas, encryption options, etc.
 borg init -e repokey-blake2 username@remote.host.address:/destination/folder
@@ -228,7 +228,7 @@ The Remote Path indicates the path for the remote borg executable.
 Only required if the Repository is stored on a system with multiple borg installations.
 
 Example:  
-For rsync.net, you should set this to `/usr/local/bin/borg1/borg1`
+For rsync.net, you should set this to `borg12` or `borg14` depending on which version of borg you have installed.
 
 ### Passphrase
 The passphrase for the Repository.  
