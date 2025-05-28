@@ -74,6 +74,10 @@ func PruneByPrefix(settings BorgSettings, ArchivePrefix string) (*exec.Cmd, erro
 		"prune",
 	}
 
+	if settings.RemotePath != "" {
+		args = append(args, "--remote-path", settings.RemotePath)
+	}
+
 	if settings.Prune.KeepWithin != "" {
 		args = append(args, "--keep-within", settings.Prune.KeepWithin)
 	}
@@ -119,6 +123,10 @@ func Compact(settings BorgSettings) (*exec.Cmd, error) {
 
 	args := []string{
 		"compact",
+	}
+
+	if settings.RemotePath != "" {
+		args = append(args, "--remote-path", settings.RemotePath)
 	}
 
 	args = append(args, settings.Repository)
