@@ -147,7 +147,7 @@ func GetVersion() (*gv.Version, error) {
 		return nil, fmt.Errorf("borg returned an error: %w", err)
 	} else {
 		if regexBorgVersion == nil {
-			regexBorgVersion = regexp.MustCompile(`borg.*([\d\.]+).*`)
+			regexBorgVersion = regexp.MustCompile(`borg\s*([\d\.]+).*`)
 		}
 		submatches := regexBorgVersion.FindStringSubmatch(string(output))
 		if submatches == nil || len(submatches) != 2 {
