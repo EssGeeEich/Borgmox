@@ -90,6 +90,30 @@ systemctl daemon-reload
 systemctl enable borgmox.timer
 ```
 
+## Restoring from a Backup
+
+To restore a VM/LXC from a Backup, currently the best way is to use the shell, using borg directly:
+
+```
+# Only for Rsync.net users, use borg12 or borg14 according to your local borg version (borg -V=
+export BORG_REMOTE_PATH=borg12
+
+# Set the Repository and Passphrase based on what's already in your config
+export BORG_REPO=ssh://your.borg.repo
+export BORG_PASSPHRASE='your.borg!passphrase'
+
+# List the available backups
+borg list | grep your_vmid
+
+# Start the restore process (VM Only)
+borg extract ::your-backup-file_date_hour.vma --stdout | qmrestore - (new_vmid)
+
+# Start the restore process (LXC Only)
+borg extract ::your-backup-file_date_hour.tar --stdout | pct restore (new_vmid) --rootfs (your_new_rootfs) -
+```
+
+TODO: Document what your_new_rootfs should look like...!
+
 # Configuration file
 
 A configuration file, first of all, contains a list of "jobs":
